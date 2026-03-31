@@ -34,8 +34,7 @@ public class AuthMenu {
     private void loginFlow() {
         System.out.println("\n--- ĐĂNG NHẬP ---");
         while (true) {
-            System.out.print("Tài khoản: ");
-            String user = InputUtils.sc.nextLine().trim();
+            String user = InputUtils.readLine("Tài khoản: ");
             String pass = InputUtils.readPassword("Mật khẩu: ");
 
             User loggedInUser = userBusiness.login(user, pass);
@@ -44,7 +43,7 @@ public class AuthMenu {
                 routeByRole(loggedInUser);
                 break;
             } else {
-                System.err.println("[!] Sai tài khoản/mật khẩu hoặc tài khoản bị khóa. Vui lòng thử lại!\n");
+                System.out.println("[!] Sai tài khoản/mật khẩu hoặc tài khoản bị khóa. Vui lòng thử lại!\n");
             }
         }
     }
@@ -54,32 +53,30 @@ public class AuthMenu {
         String username, password, fullName;
 
         while (true) {
-            System.out.print("Nhập tài khoản: ");
-            username = InputUtils.sc.nextLine().trim();
-            if (username.isEmpty()) System.err.println("[!] Không được để trống.");
-            else if (userBusiness.isUsernameExists(username)) System.err.println("[!] Tài khoản đã tồn tại.");
+            username = utils.InputUtils.readLine("Nhập tài khoản: ");
+            if (username.isEmpty()) System.out.println("[!] Không được để trống.");
+            else if (userBusiness.isUsernameExists(username)) System.out.println("[!] Tài khoản đã tồn tại.");
             else break;
         }
 
         while (true) {
-            password = InputUtils.readPassword("Nhập mật khẩu: ");
-            if (password.isEmpty()) System.err.println("[!] Mật khẩu không được để trống.");
+            password = utils.InputUtils.readPassword("Nhập mật khẩu: ");
+            if (password.isEmpty()) System.out.println("[!] Mật khẩu không được để trống.");
             else break;
         }
 
         while (true) {
-            System.out.print("Nhập họ tên: ");
-            fullName = InputUtils.sc.nextLine().trim();
-            if (fullName.isEmpty()) System.err.println("[!] Họ tên không được để trống.");
+            fullName = utils.InputUtils.readLine("Nhập họ tên: ");
+            if (fullName.isEmpty()) System.out.println("[!] Họ tên không được để trống.");
             else break;
         }
 
-        User newUser = new User(username, password, fullName, "CUSTOMER");
+        entity.User newUser = new entity.User(username, password, fullName, "CUSTOMER");
         if (userBusiness.register(newUser)) {
             System.out.println("\n[+] Đăng ký thành công!");
             routeByRole(newUser);
         } else {
-            System.err.println("[!] Lỗi hệ thống khi đăng ký.");
+            System.out.println("[!] Lỗi hệ thống khi đăng ký.");
         }
     }
 
@@ -92,23 +89,10 @@ public class AuthMenu {
         String role = user.getRole().toUpperCase();
 
         switch (role) {
-            case "MANAGER":
-                new ManagerMenu().showMenu(user);
-                break;
-
-            case "CUSTOMER":
-                System.out.println("\n[+] Đang vào giao diện KHÁCH HÀNG (Gọi món)...");
-                System.out.println("Ấn Enter để đăng xuất.");
-                InputUtils.sc.nextLine();
-                break;
-
-            case "CHEF":
-                new ChefMenu().showMenu(user);
-                break;
-
-            default:
-                System.err.println("[!] Hệ thống không nhận diện được quyền: " + role);
-                break;
+            case "MANAGER" -> new ManagerMenu().showMenu(user);
+            case "CUSTOMER" -> new CustomerMenu().showMenu(user);
+            case "CHEF" -> new ChefMenu().showMenu(user);
+            default -> System.err.println("[!] Hệ thống không nhận diện được quyền: " + role);
         }
     }
 }

@@ -8,6 +8,21 @@ import java.util.List;
 
 public class CategoryBusiness {
 
+    // Thêm hàm kiểm tra xem danh mục có đang chứa món ăn nào không
+    public boolean isCategoryInUse(int id) {
+        String sql = "SELECT id FROM menu_items WHERE category_id = ?";
+        try (java.sql.Connection conn = utils.DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeQuery().next(); // Trả về true nếu có món ăn đang dùng ID này
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
     // Kiểm tra ID phân loại có tồn tại không
     public boolean isCategoryIdExists(int id) {
         String sql = "SELECT id FROM categories WHERE id = ?";
@@ -74,8 +89,7 @@ public class CategoryBusiness {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            // Bắt lỗi nếu danh mục này đang có món ăn (dính khóa ngoại)
-            System.err.println("[!] Không thể xóa danh mục đang chứa món ăn!");
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

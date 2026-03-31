@@ -20,16 +20,30 @@ public class UserBusiness {
         return false;
     }
 
-    public boolean register(User user) {
+    // Đăng ký tài khoản mới và LẤY LẠI ID để gán cho User
+    public boolean register(entity.User user) {
         String sql = "INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        try (java.sql.Connection conn = utils.DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getRole());
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
+
+            int affectedRows = ps.executeUpdate();
+
+            if (affectedRows > 0) {
+                // Bắt lại ID mà MySQL vừa tự động sinh ra
+                try (java.sql.ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        user.setId(rs.getInt(1)); // Gán ID thực tế vào đối tượng Java
+                    }
+                }
+                return true;
+            }
+        } catch (java.sql.SQLException e) {
             e.printStackTrace();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -46,6 +60,7 @@ public class UserBusiness {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 User user = new User();
+                user.setId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
                 user.setFullName(rs.getString("full_name"));
                 user.setRole(rs.getString("role"));

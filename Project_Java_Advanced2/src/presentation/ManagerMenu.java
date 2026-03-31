@@ -22,14 +22,16 @@ public class ManagerMenu {
             System.out.println("│  [1] Quản lý Phân loại món                      │");
             System.out.println("│  [2] Quản lý Thực đơn                           │");
             System.out.println("│  [3] Quản lý Bàn                                │");
+            System.out.println("│  [4] Thanh toán & Hóa đơn                       │");
             System.out.println("│  [0] Đăng xuất                                  │");
             System.out.println("╰─────────────────────────────────────────────────╯");
 
             String choice = InputUtils.readLine(" => Chọn chức năng: ");
             switch (choice) {
                 case "1" -> manageCategories();
-                case "2" -> manageMenuItems(); // Chỗ này sau bạn gọi hàm manageMenuItems()
+                case "2" -> manageMenuItems();
                 case "3" -> manageTables();
+                case "4" -> checkoutFlow();
                 case "0" -> {
                     System.out.println("Đã đăng xuất khỏi giao diện Quản lý!");
                     return;
@@ -40,7 +42,7 @@ public class ManagerMenu {
     }
 
     // ==========================================
-    // 1. QUẢN LÝ CATEGORY (CRUD + TÌM KIẾM + VALIDATE)
+    // 1. QUẢN LÝ CATEGORY
     // ==========================================
     private void manageCategories() {
         while (true) {
@@ -105,12 +107,38 @@ public class ManagerMenu {
                         }
                     }
                     case "3" -> {
-                        int id = Integer.parseInt(utils.InputUtils.readLine("Nhập ID cần xóa: "));
-                        String confirm = utils.InputUtils.readLine("Bạn có chắc muốn xóa ID " + id + "? (y/n): ");
-                        if (confirm.equalsIgnoreCase("y") && categoryBusiness.deleteCategory(id)) {
-                            System.out.println("[+] Xóa thành công!");
-                        } else if (confirm.equalsIgnoreCase("y")) {
-                            System.out.println("[!] Không thể xóa do lỗi hoặc ID không tồn tại.");
+                        int id;
+                        while (true) {
+                            try {
+                                String input = utils.InputUtils.readLine("Nhập ID cần xóa (hoặc nhập 0 để hủy): ").trim();
+                                if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
+
+                                id = Integer.parseInt(input);
+                                if (id == 0) break;
+
+                                if (!categoryBusiness.isCategoryIdExists(id)) {
+                                    System.out.println("[!] Lỗi: ID phân loại không tồn tại! Vui lòng nhập lại.");
+                                } else if (categoryBusiness.isCategoryInUse(id)) {
+                                    // Chặn ngay từ đầu nếu danh mục có chứa món ăn
+                                    System.out.println("[!] Lỗi: Không thể xóa! Danh mục này đang chứa món ăn. Vui lòng xóa/chuyển các món ăn trước.");
+                                    id = 0; // Ép về 0 để hủy thao tác xóa
+                                    break;
+                                } else {
+                                    break;
+                                }
+                            } catch (Exception e) { System.out.println("[!] Lỗi: ID phải là số nguyên!"); }
+                        }
+                        if (id == 0) continue;
+
+                        String confirm = utils.InputUtils.readLine("Bạn có chắc muốn xóa ID " + id + "? (y/n): ").trim();
+                        if (confirm.equalsIgnoreCase("y")) {
+                            if (categoryBusiness.deleteCategory(id)) {
+                                System.out.println("[+] Xóa thành công!");
+                            } else {
+                                System.err.println("[!] Lỗi hệ thống khi xóa.");
+                            }
+                        } else {
+                            System.out.println("Đã hủy thao tác xóa.");
                         }
                     }
                     case "4" -> {
@@ -145,16 +173,16 @@ public class ManagerMenu {
     // ==========================================
     private void manageTables() {
         while (true) {
-            System.out.println("\n+=================================================+");
-            System.out.println("|               QUẢN LÝ BÀN ĂN                    |");
-            System.out.println("+=================================================+");
-            System.out.println("|  [1] Xem toàn bộ danh sách bàn                  |");
-            System.out.println("|  [2] Tìm kiếm bàn ăn                            |");
-            System.out.println("|  [3] Thêm bàn mới                               |");
-            System.out.println("|  [4] Sửa thông tin bàn                          |");
-            System.out.println("|  [5] Xóa bàn                                    |");
-            System.out.println("|  [0] Quay lại menu chính                        |");
-            System.out.println("+-------------------------------------------------+");
+            System.out.println("\n╭─────────────────────────────────────────────────╮");
+            System.out.println("│               QUẢN LÝ BÀN ĂN                    │");
+            System.out.println("├─────────────────────────────────────────────────┤");
+            System.out.println("│  [1] Xem toàn bộ danh sách bàn                  │");
+            System.out.println("│  [2] Tìm kiếm bàn ăn                            │");
+            System.out.println("│  [3] Thêm bàn mới                               │");
+            System.out.println("│  [4] Sửa thông tin bàn                          │");
+            System.out.println("│  [5] Xóa bàn                                    │");
+            System.out.println("│  [0] Quay lại menu chính                        │");
+            System.out.println("╰─────────────────────────────────────────────────╯");
 
             String opt = utils.InputUtils.readLine(" => Chọn chức năng: ").trim();
             if (opt.equals("0")) break;
@@ -164,21 +192,21 @@ public class ManagerMenu {
                     System.out.println("\n--- DANH SÁCH BÀN ĂN ---");
                     tableBusiness.displayAllTables();
                 }
+
                 case "2" -> {
                     System.out.println("\n--- TÌM KIẾM BÀN ĂN ---");
                     while (true) {
-                        String keyword = utils.InputUtils.readLine("Nhập số bàn muốn tìm (hoặc '0' để hủy): ").trim();
-                        if (keyword.equals("0")) break;
+                        String keyword = utils.InputUtils.readLine("Nhập số bàn muốn tìm (hoặc '0' để hủy): ");
 
                         if (keyword.isEmpty()) {
-                            System.out.println("[!] Lỗi: Vui lòng không để trống từ khóa!");
-                        } else {
-                            System.out.println("\n=> KẾT QUẢ TÌM KIẾM CHO SỐ BÀN CÓ CHỨA: \"" + keyword + "\"");
-                            tableBusiness.searchTable(keyword);
-                            break; // Tìm xong thì thoát vòng lặp tìm kiếm
+                            continue;
                         }
+                        if (keyword.equals("0")) break;
+                        System.out.println("\n=> KẾT QUẢ TÌM KIẾM CHO SỐ BÀN: " + keyword);
+                        break;
                     }
                 }
+
                 case "3" -> {
                     System.out.println("\n--- THÊM BÀN MỚI ---");
                     int tableNo;
@@ -195,7 +223,7 @@ public class ManagerMenu {
                             } else if (tableBusiness.isTableNumberExists(tableNo, -1)) {
                                 System.out.println("[!] Lỗi: Bàn số " + tableNo + " đã tồn tại! Vui lòng nhập số khác.");
                             } else {
-                                break; // Nhập chuẩn thì đi tiếp
+                                break;
                             }
                         } catch (NumberFormatException e) {
                             System.out.println("[!] Lỗi: Số bàn phải là một con số nguyên!");
@@ -238,7 +266,7 @@ public class ManagerMenu {
                         }
                         try {
                             id = Integer.parseInt(input);
-                            if (id == 0) break; // Chọn 0 để thoát vòng lặp
+                            if (id == 0) break;
 
                             if (!tableBusiness.isTableIdExists(id)) {
                                 System.out.println("[!] Lỗi: ID bàn không tồn tại! Vui lòng nhập lại ID khác.");
@@ -249,7 +277,7 @@ public class ManagerMenu {
                             System.out.println("[!] Lỗi: ID phải là số nguyên.");
                         }
                     }
-                    if (id == 0) continue; // Quay lại menu chính
+                    if (id == 0) continue;
 
                     System.out.println("\n--- Nhập thông tin mới ---");
                     int newTableNo;
@@ -263,7 +291,7 @@ public class ManagerMenu {
                             newTableNo = Integer.parseInt(input);
                             if (newTableNo <= 0) {
                                 System.out.println("[!] Lỗi: Số bàn phải lớn hơn 0!");
-                            } else if (tableBusiness.isTableNumberExists(newTableNo, id)) { // Truyền id để ko check trùng với chính nó
+                            } else if (tableBusiness.isTableNumberExists(newTableNo, id)) {
                                 System.out.println("[!] Lỗi: Bàn số " + newTableNo + " đã tồn tại! Vui lòng nhập số khác.");
                             } else {
                                 break;
@@ -304,7 +332,7 @@ public class ManagerMenu {
                     while (true) {
                         String input = utils.InputUtils.readLine("Nhập ID bàn muốn xóa (hoặc 0 để hủy): ").trim();
                         if (input.isEmpty()) {
-                            System.out.println("[!] Lỗi: Không được để trống!");
+                            System.err.println("[!] Lỗi: Không được để trống!");
                             continue;
                         }
                         try {
@@ -312,12 +340,12 @@ public class ManagerMenu {
                             if (id == 0) break;
 
                             if (!tableBusiness.isTableIdExists(id)) {
-                                System.out.println("[!] Lỗi: ID bàn không tồn tại! Vui lòng nhập lại.");
+                                System.err.println("[!] Lỗi: ID bàn không tồn tại! Vui lòng nhập lại.");
                             } else {
                                 break;
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("[!] Lỗi: ID phải là một số nguyên.");
+                            System.err.println("[!] Lỗi: ID phải là một số nguyên.");
                         }
                     }
                     if (id == 0) continue;
@@ -327,81 +355,61 @@ public class ManagerMenu {
                         if (tableBusiness.deleteTable(id)) {
                             System.out.println("[+] Đã xóa bàn thành công!");
                         } else {
-                            System.out.println("[!] Xóa thất bại! (Bàn này có thể đang được sử dụng hoặc dính lịch sử Order).");
+                            System.err.println("[!] Xóa thất bại! (Bàn này có thể đang được sử dụng hoặc dính lịch sử Order).");
                         }
                     } else {
                         System.out.println("Đã hủy thao tác xóa.");
                     }
                 }
-                default -> System.out.println("[!] Lựa chọn không hợp lệ.");
+                default -> System.err.println("[!] Lựa chọn không hợp lệ.");
             }
         }
     }
 
     // ==========================================
-    // QUẢN LÝ THỰC ĐƠN (MENU ITEMS) & TÌM KIẾM
+    // 2. QUẢN LÝ THỰC ĐƠN (MENU ITEMS)
     // ==========================================
     private void manageMenuItems() {
         while (true) {
-            System.out.println("\n+=================================================+");
-            System.out.println("|             QUẢN LÝ THỰC ĐƠN MÓN ĂN             |");
-            System.out.println("+=================================================+");
-            System.out.println("|  [1] Xem toàn bộ danh sách món                  |");
-            System.out.println("|  [2] Tìm kiếm món theo tên                      |");
-            System.out.println("|  [3] Thêm món mới                               |");
-            System.out.println("|  [4] Sửa thông tin món                          |");
-            System.out.println("|  [5] Xóa món                                    |");
-            System.out.println("|  [0] Quay lại menu chính                        |");
-            System.out.println("+-------------------------------------------------+");
+            System.out.println("\n╭─────────────────────────────────────────────────╮");
+            System.out.println("│             QUẢN LÝ THỰC ĐƠN MÓN ĂN             │");
+            System.out.println("├─────────────────────────────────────────────────┤");
+            System.out.println("│  [1] Xem toàn bộ danh sách món                  │");
+            System.out.println("│  [2] Tìm kiếm món theo tên                      │");
+            System.out.println("│  [3] Thêm món mới                               │");
+            System.out.println("│  [4] Sửa thông tin món                          │");
+            System.out.println("│  [5] Xóa món                                    │");
+            System.out.println("│  [0] Quay lại menu chính                        │");
+            System.out.println("╰─────────────────────────────────────────────────╯");
 
-            String opt = utils.InputUtils.readLine(" => Chọn chức năng: ");
+            String opt = utils.InputUtils.readLine(" => Chọn chức năng: ").trim();
             if (opt.equals("0")) break;
 
             switch (opt) {
                 case "1" -> {
                     System.out.println("\n--- TẤT CẢ THỰC ĐƠN ---");
-                    menuBusiness.displayMenu(null); // Truyền null để lấy tất cả
+                    menuBusiness.displayMenu(null); // null để hiển thị toàn bộ
                 }
                 case "2" -> {
-                    int id;
+                    System.out.println("\n--- TÌM KIẾM MÓN ĂN ---");
                     while (true) {
-                        try {
-                            String input = utils.InputUtils.readLine("Nhập ID cần sửa (hoặc nhập 0 để hủy): ");
-                            id = Integer.parseInt(input);
-                            if (id == 0) break; // Thoát vòng lặp nếu muốn hủy
+                        String keyword = utils.InputUtils.readLine("Nhập tên món muốn tìm kiếm (hoặc 0 để hủy): ").trim();
+                        if (keyword.equals("0")) break;
 
-                            if (!categoryBusiness.isCategoryIdExists(id)) {
-                                System.out.println("[!] Lỗi: ID phân loại không tồn tại! Vui lòng nhập lại.");
-                            } else {
-                                break; // ID đúng thì đi tiếp
-                            }
-                        } catch (Exception e) { System.out.println("[!] Lỗi: ID phải là số nguyên!"); }
-                    }
-                    if (id == 0) continue; // Quay lại menu nếu chọn hủy
-
-                    String newName;
-                    while (true) {
-                        newName = utils.InputUtils.readLine("Nhập tên mới: ");
-                        if (newName.isEmpty()) {
-                            System.out.println("[!] Lỗi: Tên không được để trống!");
-                        } else if (categoryBusiness.isCategoryNameExists(newName)) {
-                            System.out.println("[!] Lỗi: Tên '" + newName + "' đã tồn tại!");
+                        if (keyword.isEmpty()) {
+                            System.out.println("[!] Lỗi: Vui lòng không để trống từ khóa!");
                         } else {
+                            System.out.println("\n=> KẾT QUẢ TÌM KIẾM CHO: \"" + keyword + "\"");
+                            menuBusiness.displayMenu(keyword);
                             break;
                         }
                     }
-
-                    if (categoryBusiness.updateCategory(id, newName)) {
-                        System.out.println("[+] Sửa thành công!");
-                    }
                 }
-
                 case "3" -> {
                     System.out.println("\n--- THÊM MÓN MỚI ---");
-
                     String name;
                     while (true) {
-                        name = utils.InputUtils.readLine("Nhập tên món: ");
+                        name = utils.InputUtils.readLine("Nhập tên món: ").trim();
                         if (name.isEmpty() || name.length() > 100) {
                             System.out.println("[!] Lỗi: Tên món không hợp lệ (1-100 ký tự)!");
                         } else if (menuBusiness.isMenuItemNameExists(name)) {
@@ -413,8 +421,10 @@ public class ManagerMenu {
 
                     double price;
                     while (true) {
+                        String input = utils.InputUtils.readLine("Nhập giá tiền (> 0): ").trim();
+                        if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                         try {
-                            price = Double.parseDouble(utils.InputUtils.readLine("Nhập giá tiền (> 0): "));
+                            price = Double.parseDouble(input);
                             if (price <= 0) System.out.println("[!] Lỗi: Giá tiền phải lớn hơn 0!");
                             else break;
                         } catch (Exception e) { System.out.println("[!] Lỗi: Vui lòng nhập đúng định dạng số!"); }
@@ -423,18 +433,20 @@ public class ManagerMenu {
                     String type;
                     while (true) {
                         System.out.println("Chọn loại món: [1] Đồ ăn (FOOD)  |  [2] Đồ uống (DRINK)");
-                        String typeChoice = utils.InputUtils.readLine("=> Chọn: ");
+                        String typeChoice = utils.InputUtils.readLine("=> Chọn: ").trim();
                         if (typeChoice.equals("1")) { type = "FOOD"; break; }
                         else if (typeChoice.equals("2")) { type = "DRINK"; break; }
-                        else System.out.println("[!] Lỗi: Vui lòng chỉ chọn 1 hoặc 2!");
+                        else System.out.println("[!] Lỗi: Vui lòng chỉ gõ phím 1 hoặc 2!");
                     }
 
                     int stock = 0;
                     if (type.equals("DRINK")) {
                         while (true) {
+                            String input = utils.InputUtils.readLine("Nhập số lượng tồn kho (> 0): ").trim();
+                            if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                             try {
-                                stock = Integer.parseInt(utils.InputUtils.readLine("Nhập số lượng tồn kho (> 0): "));
-                                if (stock <= 0) System.out.println("[!] Lỗi: Số lượng tồn kho phải lớn hơn 0!");
+                                stock = Integer.parseInt(input);
+                                if (stock <= 0) System.out.println("[!] Lỗi: Số lượng phải lớn hơn 0!");
                                 else break;
                             } catch (Exception e) { System.out.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
                         }
@@ -442,31 +454,37 @@ public class ManagerMenu {
 
                     int catId;
                     while (true) {
+                        System.out.println("\n- Danh sách ID Phân loại hiện có -");
+                        for (entity.Category c : categoryBusiness.getAllCategories()) {
+                            System.out.println("ID: " + c.getId() + " - " + c.getName());
+                        }
+                        String input = utils.InputUtils.readLine("Nhập ID Phân loại (Category ID): ").trim();
+                        if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                         try {
-                            System.out.println("\n- Danh sách ID Phân loại hiện có -");
-                            for (entity.Category c : categoryBusiness.getAllCategories()) {
-                                System.out.println("ID: " + c.getId() + " - " + c.getName());
+                            catId = Integer.parseInt(input);
+                            if (categoryBusiness.isCategoryIdExists(catId)) {
+                                break;
+                            } else {
+                                System.out.println("[!] Lỗi: ID Phân loại không tồn tại!");
                             }
-                            catId = Integer.parseInt(utils.InputUtils.readLine("Nhập ID Phân loại (Category ID): "));
-                            break;
                         } catch (Exception e) { System.out.println("[!] Lỗi: ID Phân loại phải là số nguyên!"); }
                     }
 
                     if (menuBusiness.addMenuItem(name, price, catId, type, stock)) {
                         System.out.println("\n[+] Thêm món '" + name + "' thành công!");
                     } else {
-                        System.out.println("\n[!] Thêm thất bại (Vui lòng kiểm tra lại ID Phân loại có tồn tại không).");
+                        System.out.println("\n[!] Lỗi hệ thống khi thêm món.");
                     }
                 }
                 case "4" -> {
                     System.out.println("\n--- SỬA THÔNG TIN MÓN ---");
                     int id;
                     while (true) {
+                        String input = utils.InputUtils.readLine("Nhập ID món muốn sửa (hoặc 0 để hủy): ").trim();
+                        if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                         try {
-                            String input = utils.InputUtils.readLine("Nhập ID món muốn sửa (hoặc 0 để hủy): ");
                             id = Integer.parseInt(input);
                             if (id == 0) break;
-
                             if (!menuBusiness.isMenuItemExists(id)) {
                                 System.out.println("[!] Lỗi: ID món ăn không tồn tại hoặc đã bị xóa! Vui lòng nhập lại.");
                             } else {
@@ -476,15 +494,14 @@ public class ManagerMenu {
                     }
                     if (id == 0) continue;
 
-                    System.out.println("\n--- Nhập thông tin mới để cập nhật toàn bộ ---");
-
+                    System.out.println("\n--- Nhập thông tin mới ---");
                     String newName;
                     while (true) {
-                        newName = utils.InputUtils.readLine("Tên mới: ");
+                        newName = utils.InputUtils.readLine("Tên mới: ").trim();
                         if (newName.isEmpty() || newName.length() > 100) {
                             System.out.println("[!] Lỗi: Tên món không hợp lệ (1-100 ký tự)!");
                         } else if (menuBusiness.isMenuItemNameExists(newName)) {
-                            System.out.println("[!] Lỗi: Tên món '" + newName + "' đã tồn tại! Vui lòng chọn tên khác.");
+                            System.out.println("[!] Lỗi: Tên món '" + newName + "' đã tồn tại!");
                         } else {
                             break;
                         }
@@ -492,8 +509,10 @@ public class ManagerMenu {
 
                     double newPrice;
                     while (true) {
+                        String input = utils.InputUtils.readLine("Giá mới (> 0): ").trim();
+                        if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                         try {
-                            newPrice = Double.parseDouble(utils.InputUtils.readLine("Giá mới (> 0): "));
+                            newPrice = Double.parseDouble(input);
                             if (newPrice <= 0) System.out.println("[!] Lỗi: Giá tiền phải lớn hơn 0!");
                             else break;
                         } catch (Exception e) { System.out.println("[!] Lỗi: Vui lòng nhập đúng định dạng số!"); }
@@ -502,7 +521,7 @@ public class ManagerMenu {
                     String newType;
                     while (true) {
                         System.out.println("Loại món mới: [1] Đồ ăn (FOOD)  |  [2] Đồ uống (DRINK)");
-                        String typeChoice = utils.InputUtils.readLine("=> Chọn: ");
+                        String typeChoice = utils.InputUtils.readLine("=> Chọn: ").trim();
                         if (typeChoice.equals("1")) { newType = "FOOD"; break; }
                         else if (typeChoice.equals("2")) { newType = "DRINK"; break; }
                         else System.out.println("[!] Lỗi: Vui lòng chỉ chọn 1 hoặc 2!");
@@ -511,8 +530,10 @@ public class ManagerMenu {
                     int newStock = 0;
                     if (newType.equals("DRINK")) {
                         while (true) {
+                            String input = utils.InputUtils.readLine("Số lượng tồn kho mới (> 0): ").trim();
+                            if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                             try {
-                                newStock = Integer.parseInt(utils.InputUtils.readLine("Số lượng tồn kho mới (> 0): "));
+                                newStock = Integer.parseInt(input);
                                 if (newStock <= 0) System.out.println("[!] Lỗi: Số lượng tồn kho phải lớn hơn 0!");
                                 else break;
                             } catch (Exception e) { System.out.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
@@ -521,33 +542,39 @@ public class ManagerMenu {
 
                     int newCatId;
                     while (true) {
+                        System.out.println("\n- Danh sách ID Phân loại hiện có -");
+                        for (entity.Category c : categoryBusiness.getAllCategories()) {
+                            System.out.println("ID: " + c.getId() + " - " + c.getName());
+                        }
+                        String input = utils.InputUtils.readLine("ID Phân loại mới: ").trim();
+                        if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                         try {
-                            System.out.println("\n- Danh sách ID Phân loại hiện có -");
-                            for (entity.Category c : categoryBusiness.getAllCategories()) {
-                                System.out.println("ID: " + c.getId() + " - " + c.getName());
+                            newCatId = Integer.parseInt(input);
+                            if (categoryBusiness.isCategoryIdExists(newCatId)) {
+                                break;
+                            } else {
+                                System.out.println("[!] Lỗi: ID Phân loại không tồn tại!");
                             }
-                            newCatId = Integer.parseInt(utils.InputUtils.readLine("ID Phân loại mới: "));
-                            break;
                         } catch (Exception e) { System.out.println("[!] Lỗi: ID Phân loại phải là số nguyên!"); }
                     }
 
                     if (menuBusiness.updateMenuItemFull(id, newName, newPrice, newCatId, newType, newStock)) {
                         System.out.println("\n[+] Cập nhật thông tin món ăn thành công!");
                     } else {
-                        System.out.println("\n[!] Cập nhật thất bại (Lỗi hệ thống hoặc ID phân loại không đúng).");
+                        System.out.println("\n[!] Cập nhật thất bại (Lỗi hệ thống).");
                     }
                 }
                 case "5" -> {
                     System.out.println("\n--- XÓA MÓN ĂN ---");
                     int id;
                     while (true) {
+                        String input = utils.InputUtils.readLine("Nhập ID món muốn xóa (hoặc 0 để hủy): ").trim();
+                        if (input.isEmpty()) { System.out.println("[!] Không được để trống!"); continue; }
                         try {
-                            String input = utils.InputUtils.readLine("Nhập ID món muốn xóa (hoặc 0 để hủy): ");
                             id = Integer.parseInt(input);
                             if (id == 0) break;
-
                             if (!menuBusiness.isMenuItemExists(id)) {
-                                System.out.println("[!] Lỗi: ID món ăn không tồn tại hoặc đã bị xóa! Vui lòng nhập lại.");
+                                System.out.println("[!] Lỗi: ID món ăn không tồn tại hoặc đã bị xóa!");
                             } else {
                                 break;
                             }
@@ -555,7 +582,7 @@ public class ManagerMenu {
                     }
                     if (id == 0) continue;
 
-                    String confirm = utils.InputUtils.readLine("Bạn có chắc chắn muốn xóa món này? (y/n): ");
+                    String confirm = utils.InputUtils.readLine("Bạn có chắc chắn muốn xóa món này? (y/n): ").trim();
                     if (confirm.equalsIgnoreCase("y")) {
                         if (menuBusiness.deleteMenuItem(id)) {
                             System.out.println("[+] Đã xóa món thành công!");
@@ -566,6 +593,62 @@ public class ManagerMenu {
                         System.out.println("Đã hủy thao tác xóa.");
                     }
                 }
+                default -> System.out.println("[!] Lựa chọn không hợp lệ.");
+            }
+        }
+    }
+
+    // ==========================================
+    // 4. THANH TOÁN & HÓA ĐƠN
+    // ==========================================
+    private void checkoutFlow() {
+        System.out.println("\n--- THANH TOÁN (CHECK OUT) ---");
+
+        business.OrderBusiness orderBus = new business.OrderBusiness();
+
+        if (!orderBus.displayOccupiedTables()) {
+            return; // Nếu không có bàn nào đang ăn thì tự thoát
+        }
+
+        int tableNumber;
+        while (true) {
+            String input = utils.InputUtils.readLine("\nNhập SỐ BÀN muốn thanh toán (hoặc 0 để quay lại): ");
+            if (input.isEmpty()) continue; // Chống trôi phím Enter
+
+            try {
+                tableNumber = Integer.parseInt(input);
+                if (tableNumber == 0) return; // Quay lại menu
+
+                // Trích xuất thông tin Bill dựa trên SỐ BÀN
+                double[] billInfo = orderBus.printBillAndGetTotal(tableNumber);
+                if (billInfo == null) {
+                    System.out.println("[!] Lỗi: Số bàn này không tồn tại hoặc không có hóa đơn nào đang chờ thanh toán!");
+                } else {
+                    int orderId = (int) billInfo[0];
+                    double totalAmount = billInfo[1];
+
+                    // Kiểm tra xem Đầu bếp đã làm xong hết chưa
+                    if (!orderBus.isOrderFullyServed(orderId)) {
+                        System.out.println("\n[!] TỪ CHỐI THANH TOÁN: Bàn này vẫn còn món chưa phục vụ xong (Đang chờ Bếp / Đang nấu)!");
+                        System.out.println("=> Quản lý vui lòng giục Bếp hoàn thành, hoặc Hủy các món khách không ăn nữa trước khi tính tiền.");
+                        break;
+                    }
+
+                    // Xác nhận thu tiền
+                    String confirm = utils.InputUtils.readLine("\nXác nhận khách đã thanh toán số tiền trên? (y/n): ");
+                    if (confirm.equalsIgnoreCase("y")) {
+                        if (orderBus.processCheckout(tableNumber, orderId, totalAmount)) {
+                            System.out.println("[+] THANH TOÁN THÀNH CÔNG! Bàn số " + tableNumber + " đã được dọn trống (AVAILABLE).");
+                        } else {
+                            System.out.println("[!] Lỗi hệ thống: Không thể thanh toán lúc này.");
+                        }
+                    } else {
+                        System.out.println("Đã hủy thao tác thanh toán.");
+                    }
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("[!] Lỗi: Số bàn phải là số nguyên.");
             }
         }
     }

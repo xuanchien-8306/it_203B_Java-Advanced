@@ -12,20 +12,28 @@ public class TableBusiness {
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
-            System.out.println("+----+----------+----------+-----------+");
-            System.out.printf("| %-2s | %-8s | %-8s | %-9s |\n", "ID", "Số Bàn", "Sức Chứa", "Trạng Thái");
-            System.out.println("+----+----------+----------+-----------+");
+            System.out.println("╭───────────────────────────────────────╮");
+            System.out.println("│           DANH SÁCH BÀN ĂN            │");
+            System.out.println("├────┬──────────┬──────────┬────────────┤");
+            System.out.printf ("│ %-2s │ %-8s │ %-8s │ %-9s │\n", "ID", "Số Bàn", "Sức Chứa", "Trạng Thái");
+            System.out.println("├────┼──────────┼──────────┼────────────┤");
 
             boolean hasData = false;
+
             while (rs.next()) {
                 hasData = true;
-                System.out.printf("| %-2d | %-8d | %-8d | %-9s |\n",
-                        rs.getInt("id"), rs.getInt("table_number"), rs.getInt("capacity"), rs.getString("status"));
+                System.out.printf("│ %-2d │ %-8d │ %-8d │ %-9s  │\n",
+                        rs.getInt("id"),
+                        rs.getInt("table_number"),
+                        rs.getInt("capacity"),
+                        rs.getString("status"));
             }
+
             if (!hasData) {
-                System.out.println("| Chưa có dữ liệu bàn ăn nào!            |");
+                System.out.printf("│ %-46s │\n", "Chưa có dữ liệu bàn ăn nào!");
             }
-            System.out.println("+----+----------+----------+-----------+");
+
+            System.out.println("╰────┴──────────┴──────────┴───────────╯");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -44,20 +52,28 @@ public class TableBusiness {
             ps.setString(1, "%" + keyword + "%");
             ResultSet rs = ps.executeQuery();
 
-            System.out.println("+----+----------+----------+-----------+");
-            System.out.printf("| %-2s | %-8s | %-8s | %-9s |\n", "ID", "Số Bàn", "Sức Chứa", "Trạng Thái");
-            System.out.println("+----+----------+----------+-----------+");
+            System.out.println("╭───────────────────────────────────────╮");
+            System.out.println("│           DANH SÁCH BÀN ĂN            │");
+            System.out.println("├────┬──────────┬──────────┬────────────┤");
+            System.out.printf ("│ %-2s │ %-8s │ %-8s │ %-9s │\n", "ID", "Số Bàn", "Sức Chứa", "Trạng Thái");
+            System.out.println("├────┼──────────┼──────────┼────────────┤");
 
             boolean hasData = false;
+
             while (rs.next()) {
                 hasData = true;
-                System.out.printf("| %-2d | %-8d | %-8d | %-9s |\n",
-                        rs.getInt("id"), rs.getInt("table_number"), rs.getInt("capacity"), rs.getString("status"));
+                System.out.printf("│ %-2d │ %-8d │ %-8d │ %-9s  │\n",
+                        rs.getInt("id"),
+                        rs.getInt("table_number"),
+                        rs.getInt("capacity"),
+                        rs.getString("status"));
             }
+
             if (!hasData) {
-                System.out.println("| Không tìm thấy bàn ăn phù hợp!           |");
+                System.out.printf("│ %-46s │\n", "Không tìm thấy bàn ăn phù hợp!");
             }
-            System.out.println("+----+----------+----------+-----------+");
+
+            System.out.println("╰────┴──────────┴──────────┴────────────╯");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -109,7 +125,7 @@ public class TableBusiness {
             ps.setInt(2, capacity);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("[!] Lỗi: Số bàn có thể đã tồn tại!");
+            System.err.println("[!] Lỗi: Số bàn có thể đã tồn tại!");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -146,5 +162,60 @@ public class TableBusiness {
             throw new RuntimeException(e);
         }
         return false;
+    }
+
+    // 8. Hiển thị các bàn CÒN TRỐNG
+    public void displayAvailableTables() {
+        String sql = "SELECT * FROM restaurant_tables WHERE status = 'AVAILABLE'";
+        try (java.sql.Connection conn = utils.DBConnection.getConnection();
+             java.sql.Statement st = conn.createStatement();
+             java.sql.ResultSet rs = st.executeQuery(sql)) {
+
+            System.out.println("╭───────────────────────────────────────╮");
+            System.out.println("│           DANH SÁCH BÀN ĂN            │");
+            System.out.println("├────┬──────────┬──────────┬────────────┤");
+            System.out.printf ("│ %-2s │ %-8s │ %-8s │ %-9s │\n", "ID", "Số Bàn", "Sức Chứa", "Trạng Thái");
+            System.out.println("├────┼──────────┼──────────┼────────────┤");
+
+            boolean hasData = false;
+
+            while (rs.next()) {
+                hasData = true;
+                System.out.printf("│ %-2d │ %-8d │ %-8d │ %-9s  │\n",
+                        rs.getInt("id"),
+                        rs.getInt("table_number"),
+                        rs.getInt("capacity"),
+                        rs.getString("status"));
+            }
+
+            if (!hasData) {
+                System.out.printf("│ %-46s │\n", "Hiện tại nhà hàng đã hết bàn trống!");
+            }
+
+            System.out.println("╰────┴──────────┴──────────┴────────────╯");
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // 9. Kiểm tra bàn có tồn tại và CÒN TRỐNG hay không
+    public boolean isTableAvailable(int id) {
+        String sql = "SELECT id FROM restaurant_tables WHERE id = ? AND status = 'AVAILABLE'";
+        try (java.sql.Connection conn = utils.DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeQuery().next();
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    // 10. Lấy ID Bàn thông qua Số Bàn
+    public int getAvailableTableIdByNumber(int tableNumber) {
+        String sql = "SELECT id FROM restaurant_tables WHERE table_number = ? AND status = 'AVAILABLE'";
+        try (java.sql.Connection conn = utils.DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tableNumber);
+            java.sql.ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("id");
+        } catch (Exception e) { throw new RuntimeException(e); }
+        return -1;
     }
 }

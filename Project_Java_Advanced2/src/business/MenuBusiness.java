@@ -20,9 +20,10 @@ public class MenuBusiness {
         return false;
     }
 
-    // 1. Hiển thị và tìm kiếm
+    // 1. Hiển thị và tìm kiếm (Đã ẩn các món DRINK hết hàng)
     public void displayMenu(String keyword) {
-        String sql = "SELECT * FROM menu_items WHERE is_available = TRUE";
+        String sql = "SELECT * FROM menu_items WHERE is_available = TRUE AND (type = 'FOOD' OR (type = 'DRINK' AND stock > 0))";
+
         if (keyword != null && !keyword.isEmpty()) {
             sql += " AND name LIKE ?";
         }
@@ -35,25 +36,31 @@ public class MenuBusiness {
             }
 
             java.sql.ResultSet rs = ps.executeQuery();
-            System.out.println("+----+----------------------+--------------+-------+---------+");
-            System.out.printf("| %-2s | %-20s | %-12s | %-5s | %-7s |\n", "ID", "Tên món", "Giá (VNĐ)", "Loại", "Tồn kho");
-            System.out.println("+----+----------------------+--------------+-------+---------+");
+            System.out.println("╭────┬──────────────────────┬──────────────┬───────┬─────────╮");
+            System.out.printf ("│ %-2s │ %-20s │ %-12s │ %-5s │ %-7s │\n", "ID", "Tên món", "Giá (VNĐ)", "Loại", "Tồn kho");
+            System.out.println("├────┼──────────────────────┼──────────────┼───────┼─────────┤");
 
             boolean hasData = false;
+
             while (rs.next()) {
                 hasData = true;
                 String type = rs.getString("type");
-                String stock = type.equals("DRINK") ? String.valueOf(rs.getInt("stock")) : "-";
-                System.out.printf("| %-2d | %-20s | %-12.2f | %-5s | %-7s |\n",
-                        rs.getInt("id"), rs.getString("name"), rs.getDouble("price"), type, stock);
+                String stock = type.equals("DRINK") ? String.valueOf(rs.getInt("stock")) : "Sẵn có";
+
+                System.out.printf("│ %-2d │ %-20s │ %-12.2f │ %-5s │ %-7s │\n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getDouble("price"),
+                        type,
+                        stock);
             }
 
-            // Fix lỗi hiển thị dính chữ ở đây: Bắt buộc dùng println
             if (!hasData) {
-                System.out.println("| Không tìm thấy món ăn nào phù hợp!                         |");
+                System.out.printf("│ %-56s │\n", "Không tìm thấy món ăn nào phù hợp!");
             }
-            System.out.println("+----+----------------------+--------------+-------+---------+");
-            System.out.flush(); // Đẩy dữ liệu ra màn hình ngay lập tức để không bị JLine đè
+
+            System.out.println("╰────┴──────────────────────┴──────────────┴───────┴─────────╯");
+            System.out.flush();
 
         } catch (java.sql.SQLException e) {
             e.printStackTrace();
@@ -128,5 +135,17 @@ public class MenuBusiness {
             throw new RuntimeException(e);
         }
         return false;
+    }
+
+    // 4. Lấy giá tiền của món ăn (Phục vụ cho việc gọi món)
+    public double getMenuItemPrice(int id) {
+        String sql = "SELECT price FROM menu_items WHERE id = ? AND is_available = TRUE";
+        try (java.sql.Connection conn = utils.DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            java.sql.ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getDouble("price");
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1; // Không tìm thấy
     }
 }
