@@ -49,12 +49,12 @@ public class CustomerMenu {
         }
     }
 
-    // Luồng gọi món hiển thị và nhập SỐ BÀN (Rất thân thiện với người dùng)
+    // gọi món hiển thị và nhập SỐ BÀN
     private void orderFoodFlow(User customer) {
         // Lấy danh sách SỐ BÀN đang dùng
         java.util.List<Integer> myActiveTableNumbers = orderBusiness.getActiveTableNumbers(customer.getId());
         int orderId = -1;
-        int tableId = -1; // CSDL vẫn cần ID ẩn để lưu
+        int tableId = -1;
         int tableNo = -1; // SỐ BÀN do người dùng nhập
 
         if (!myActiveTableNumbers.isEmpty()) {
@@ -77,19 +77,20 @@ public class CustomerMenu {
                         tableNo = Integer.parseInt(input);
                         if (tableNo == 0) return;
 
-                        // Kiểm tra xem Số bàn nhập vào có nằm trong danh sách đang ngồi không
+                        // Kiểm tra Số bàn nhập vào có nằm trong danh sách đang ngồi không
                         if (myActiveTableNumbers.contains(tableNo)) {
                             orderId = orderBusiness.getActiveOrderIdByTableNumber(customer.getId(), tableNo);
                             break;
                         } else {
                             System.out.println("[!] Lỗi: Số bàn này không thuộc về bạn hoặc đã thanh toán.");
                         }
-                    } catch (Exception e) { System.out.println("[!] Lỗi: Số bàn phải là số nguyên."); }
+                    } catch (Exception e) {
+                        System.err.println("[!] Lỗi: Số bàn phải là số nguyên."); }
                 }
             }
         }
 
-        // Nếu khách chọn [2] (Mở bàn mới) HOẶC khách chưa có bàn nào
+        // khách chọn [2] (Mở bàn mới) HOẶC khách chưa có bàn nào
         if (orderId == -1) {
             System.out.println("\n--- BƯỚC 1: CHỌN BÀN MỚI ---");
             tableBusiness.displayAvailableTables();
@@ -132,7 +133,8 @@ public class CustomerMenu {
                     } else {
                         break;
                     }
-                } catch (Exception e) { System.out.println("[!] Lỗi: ID món phải là số nguyên!"); }
+                } catch (Exception e) {
+                    System.err.println("[!] Lỗi: ID món phải là số nguyên!"); }
             }
 
             int qty;
@@ -143,7 +145,8 @@ public class CustomerMenu {
                     qty = Integer.parseInt(input);
                     if (qty <= 0) System.out.println("[!] Lỗi: Số lượng phải lớn hơn 0!");
                     else break;
-                } catch (Exception e) { System.out.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
+                } catch (Exception e) {
+                    System.err.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
             }
 
             double price = menuBusiness.getMenuItemPrice(menuItemId);
@@ -158,7 +161,7 @@ public class CustomerMenu {
             }
         }
 
-        // Bước 3: Lưu vào CSDL
+        // Lưu vào CSDL
         if (orderId != -1) {
             // Khách gọi thêm món vào bàn cũ
             if (orderBusiness.addItemsToExistingOrder(orderId, listItems, listQtys, listPrices)) {
@@ -176,7 +179,7 @@ public class CustomerMenu {
         }
     }
 
-    // Luồng Hủy món
+    // Hủy món
     private void cancelFoodFlow(User customer) {
         System.out.println("\n--- HỦY MÓN ĐÃ GỌI ---");
         orderBusiness.viewMyOrders(customer.getId());

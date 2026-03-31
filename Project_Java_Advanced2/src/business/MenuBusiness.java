@@ -69,7 +69,7 @@ public class MenuBusiness {
         }
     }
 
-    // 2. Bổ sung hàm kiểm tra ID tồn tại (Dùng cho Sửa/Xóa)
+    // 2. kiểm tra ID tồn tại (Dùng cho Sửa/Xóa)
     public boolean isMenuItemExists(int id) {
         String sql = "SELECT id FROM menu_items WHERE id = ? AND is_available = TRUE";
         try (java.sql.Connection conn = utils.DBConnection.getConnection();

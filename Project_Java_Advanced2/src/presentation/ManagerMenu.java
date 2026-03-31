@@ -76,7 +76,7 @@ public class ManagerMenu {
                             } else if (categoryBusiness.isCategoryNameExists(name)) {
                                 System.out.println("[!] Lỗi: Tên '" + name + "' đã tồn tại! Vui lòng nhập tên khác.");
                             } else {
-                                break; // Nhập đúng, không trùng thì thoát vòng lặp
+                                break;
                             }
                         }
 
@@ -226,7 +226,7 @@ public class ManagerMenu {
                                 break;
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("[!] Lỗi: Số bàn phải là một con số nguyên!");
+                            System.err.println("[!] Lỗi: Số bàn phải là một con số nguyên!");
                         }
                     }
 
@@ -245,7 +245,7 @@ public class ManagerMenu {
                                 break;
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("[!] Lỗi: Sức chứa phải là một con số nguyên!");
+                            System.err.println("[!] Lỗi: Sức chứa phải là một con số nguyên!");
                         }
                     }
 
@@ -274,7 +274,7 @@ public class ManagerMenu {
                                 break;
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("[!] Lỗi: ID phải là số nguyên.");
+                            System.err.println("[!] Lỗi: ID phải là số nguyên.");
                         }
                     }
                     if (id == 0) continue;
@@ -297,7 +297,7 @@ public class ManagerMenu {
                                 break;
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("[!] Lỗi: Số bàn phải là một con số nguyên!");
+                            System.err.println("[!] Lỗi: Số bàn phải là một con số nguyên!");
                         }
                     }
 
@@ -316,7 +316,7 @@ public class ManagerMenu {
                                 break;
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("[!] Lỗi: Sức chứa phải là một con số nguyên!");
+                            System.err.println("[!] Lỗi: Sức chứa phải là một con số nguyên!");
                         }
                     }
 
@@ -388,7 +388,7 @@ public class ManagerMenu {
             switch (opt) {
                 case "1" -> {
                     System.out.println("\n--- TẤT CẢ THỰC ĐƠN ---");
-                    menuBusiness.displayMenu(null); // null để hiển thị toàn bộ
+                    menuBusiness.displayMenu(null);
                 }
                 case "2" -> {
                     System.out.println("\n--- TÌM KIẾM MÓN ĂN ---");
@@ -427,7 +427,8 @@ public class ManagerMenu {
                             price = Double.parseDouble(input);
                             if (price <= 0) System.out.println("[!] Lỗi: Giá tiền phải lớn hơn 0!");
                             else break;
-                        } catch (Exception e) { System.out.println("[!] Lỗi: Vui lòng nhập đúng định dạng số!"); }
+                        } catch (Exception e) {
+                            System.err.println("[!] Lỗi: Vui lòng nhập đúng định dạng số!"); }
                     }
 
                     String type;
@@ -448,7 +449,8 @@ public class ManagerMenu {
                                 stock = Integer.parseInt(input);
                                 if (stock <= 0) System.out.println("[!] Lỗi: Số lượng phải lớn hơn 0!");
                                 else break;
-                            } catch (Exception e) { System.out.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
+                            } catch (Exception e) {
+                                System.err.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
                         }
                     }
 
@@ -467,7 +469,8 @@ public class ManagerMenu {
                             } else {
                                 System.out.println("[!] Lỗi: ID Phân loại không tồn tại!");
                             }
-                        } catch (Exception e) { System.out.println("[!] Lỗi: ID Phân loại phải là số nguyên!"); }
+                        } catch (Exception e) {
+                            System.err.println("[!] Lỗi: ID Phân loại phải là số nguyên!"); }
                     }
 
                     if (menuBusiness.addMenuItem(name, price, catId, type, stock)) {
@@ -490,7 +493,8 @@ public class ManagerMenu {
                             } else {
                                 break;
                             }
-                        } catch (Exception e) { System.out.println("[!] Lỗi: ID phải là số nguyên."); }
+                        } catch (Exception e) {
+                            System.err.println("[!] Lỗi: ID phải là số nguyên."); }
                     }
                     if (id == 0) continue;
 
@@ -515,7 +519,8 @@ public class ManagerMenu {
                             newPrice = Double.parseDouble(input);
                             if (newPrice <= 0) System.out.println("[!] Lỗi: Giá tiền phải lớn hơn 0!");
                             else break;
-                        } catch (Exception e) { System.out.println("[!] Lỗi: Vui lòng nhập đúng định dạng số!"); }
+                        } catch (Exception e) {
+                            System.err.println("[!] Lỗi: Vui lòng nhập đúng định dạng số!"); }
                     }
 
                     String newType;
@@ -536,7 +541,8 @@ public class ManagerMenu {
                                 newStock = Integer.parseInt(input);
                                 if (newStock <= 0) System.out.println("[!] Lỗi: Số lượng tồn kho phải lớn hơn 0!");
                                 else break;
-                            } catch (Exception e) { System.out.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
+                            } catch (Exception e) {
+                                System.err.println("[!] Lỗi: Số lượng phải là số nguyên!"); }
                         }
                     }
 
@@ -555,7 +561,8 @@ public class ManagerMenu {
                             } else {
                                 System.out.println("[!] Lỗi: ID Phân loại không tồn tại!");
                             }
-                        } catch (Exception e) { System.out.println("[!] Lỗi: ID Phân loại phải là số nguyên!"); }
+                        } catch (Exception e) {
+                            System.err.println("[!] Lỗi: ID Phân loại phải là số nguyên!"); }
                     }
 
                     if (menuBusiness.updateMenuItemFull(id, newName, newPrice, newCatId, newType, newStock)) {
@@ -578,7 +585,8 @@ public class ManagerMenu {
                             } else {
                                 break;
                             }
-                        } catch (Exception e) { System.out.println("[!] Lỗi: ID phải là một chữ số."); }
+                        } catch (Exception e) {
+                            System.err.println("[!] Lỗi: ID phải là một chữ số."); }
                     }
                     if (id == 0) continue;
 
@@ -607,17 +615,17 @@ public class ManagerMenu {
         business.OrderBusiness orderBus = new business.OrderBusiness();
 
         if (!orderBus.displayOccupiedTables()) {
-            return; // Nếu không có bàn nào đang ăn thì tự thoát
+            return;
         }
 
         int tableNumber;
         while (true) {
             String input = utils.InputUtils.readLine("\nNhập SỐ BÀN muốn thanh toán (hoặc 0 để quay lại): ");
-            if (input.isEmpty()) continue; // Chống trôi phím Enter
+            if (input.isEmpty()) continue;
 
             try {
                 tableNumber = Integer.parseInt(input);
-                if (tableNumber == 0) return; // Quay lại menu
+                if (tableNumber == 0) return;
 
                 // Trích xuất thông tin Bill dựa trên SỐ BÀN
                 double[] billInfo = orderBus.printBillAndGetTotal(tableNumber);
@@ -648,7 +656,7 @@ public class ManagerMenu {
                     break;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("[!] Lỗi: Số bàn phải là số nguyên.");
+                System.err.println("[!] Lỗi: Số bàn phải là số nguyên.");
             }
         }
     }

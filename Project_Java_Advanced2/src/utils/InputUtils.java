@@ -23,7 +23,7 @@ public class InputUtils {
                 String input = sc.nextLine().trim();
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("[!] Lỗi: Vui lòng nhập số hợp lệ!");
+                System.err.println("[!] Lỗi: Vui lòng nhập số hợp lệ!");
             }
         }
     }

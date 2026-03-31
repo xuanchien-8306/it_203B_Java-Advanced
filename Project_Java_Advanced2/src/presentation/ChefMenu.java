@@ -32,7 +32,7 @@ public class ChefMenu {
         }
     }
 
-    // Luồng xử lý cập nhật trạng thái
+    // xử lý cập nhật trạng thái
     private void updateItemStatusFlow() {
         while (true) {
             System.out.println("\n--- CẬP NHẬT TRẠNG THÁI MÓN ĂN ---");
@@ -41,7 +41,7 @@ public class ChefMenu {
             String input = InputUtils.readLine("Nhập ID món ăn cần cập nhật (Hoặc nhập '0' để quay lại): ");
 
             if (input.equals("0")) {
-                break; // Quay lại menu chính của Bếp
+                break;
             }
 
             try {
@@ -49,12 +49,12 @@ public class ChefMenu {
                 String currentStatus = orderBusiness.getOrderItemStatus(id);
 
                 if (currentStatus == null) {
-                    System.err.println("[!] Lỗi: Không tìm thấy ID món ăn này.");
+                    System.out.println("[!] Lỗi: Không tìm thấy ID món ăn này.");
                     continue;
                 }
 
                 if (currentStatus.equals("SERVED") || currentStatus.equals("CANCELLED")) {
-                    System.err.println("[!] Món này đã phục vụ hoặc bị hủy, không thể cập nhật nữa.");
+                    System.out.println("[!] Món này đã phục vụ hoặc bị hủy, không thể cập nhật nữa.");
                     continue;
                 }
 
@@ -75,12 +75,12 @@ public class ChefMenu {
                     if (orderBusiness.updateOrderStatus(id, nextStatus)) {
                         System.out.println("[+] Thành công! Món ăn đã chuyển sang: " + nextStatus);
                     } else {
-                        System.err.println("[!] Cập nhật thất bại do lỗi hệ thống.");
+                        System.out.println("[!] Cập nhật thất bại do lỗi hệ thống.");
                     }
                 } else if (confirm.equals("0")) {
                     System.out.println("Đã hủy thao tác cập nhật.");
                 } else {
-                    System.err.println("[!] Lựa chọn không hợp lệ.");
+                    System.out.println("[!] Lựa chọn không hợp lệ.");
                 }
 
             } catch (NumberFormatException e) {

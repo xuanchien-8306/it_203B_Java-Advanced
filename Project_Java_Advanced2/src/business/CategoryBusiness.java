@@ -8,7 +8,7 @@ import java.util.List;
 
 public class CategoryBusiness {
 
-    // Thêm hàm kiểm tra xem danh mục có đang chứa món ăn nào không
+    // kiểm tra danh mục có đang chứa món ăn nào không
     public boolean isCategoryInUse(int id) {
         String sql = "SELECT id FROM menu_items WHERE category_id = ?";
         try (java.sql.Connection conn = utils.DBConnection.getConnection();
@@ -38,7 +38,7 @@ public class CategoryBusiness {
         return false;
     }
 
-    // 1. READ (Xem danh sách)
+    // 1. Xem danh sách
     public List<Category> getAllCategories() {
         List<Category> list = new ArrayList<>();
         String sql = "SELECT * FROM categories";
@@ -54,7 +54,7 @@ public class CategoryBusiness {
         return list;
     }
 
-    // 2. CREATE (Thêm mới)
+    // 2. Thêm mới
     public boolean addCategory(String name) {
         String sql = "INSERT INTO categories (name) VALUES (?)";
         try (Connection conn = DBConnection.getConnection();
@@ -67,7 +67,7 @@ public class CategoryBusiness {
         return false;
     }
 
-    // 3. UPDATE (Cập nhật)
+    // 3. Cập nhật
     public boolean updateCategory(int id, String newName) {
         String sql = "UPDATE categories SET name = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -81,7 +81,7 @@ public class CategoryBusiness {
         return false;
     }
 
-    // 4. DELETE (Xóa)
+    // 4. Xóa
     public boolean deleteCategory(int id) {
         String sql = "DELETE FROM categories WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();

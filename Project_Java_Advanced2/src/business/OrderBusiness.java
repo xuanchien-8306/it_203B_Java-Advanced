@@ -32,7 +32,7 @@ public class OrderBusiness {
             psTable.setInt(2, tableId);
             psTable.executeUpdate();
 
-            // Thêm danh sách món vào Order Items (Dùng Batch cho tối ưu)
+            // Thêm danh sách món vào Order Items
             String sqlItem = "INSERT INTO order_items (order_id, menu_item_id, quantity, price_at_order, status) VALUES (?, ?, ?, ?, 'PENDING')";
             PreparedStatement psItem = conn.prepareStatement(sqlItem);
             for (int i = 0; i < itemIds.size(); i++) {
@@ -40,9 +40,9 @@ public class OrderBusiness {
                 psItem.setInt(2, itemIds.get(i));
                 psItem.setInt(3, quantities.get(i));
                 psItem.setDouble(4, prices.get(i));
-                psItem.addBatch(); // Đưa vào mẻ
+                psItem.addBatch();
             }
-            psItem.executeBatch(); // Chạy 1 lần nguyên mẻ
+            psItem.executeBatch();
 
             // Update trạng thái bàn thành OCCUPIED
             String sqlUpdateTable = "UPDATE restaurant_tables SET status = 'OCCUPIED' WHERE id = ?";
@@ -144,7 +144,7 @@ public class OrderBusiness {
         }
     }
 
-    // 3. [Khách hàng] Hủy món (Bảo mật: Ép check đúng customerId)
+    // 3. [Khách hàng] Hủy món
     public boolean cancelOrderItem(int orderItemId, int customerId) {
         String sqlCheck = "SELECT oi.status FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE oi.id = ? AND o.customer_id = ?";
         String sqlUpdate = "UPDATE order_items SET status = 'CANCELLED' WHERE id = ?";
@@ -221,7 +221,7 @@ public class OrderBusiness {
         }
     }
 
-    // 5. Lấy trạng thái hiện tại của 1 món (Dùng cho Validate Chef)
+    // 5. Lấy trạng thái hiện tại của 1 món
     public String getOrderItemStatus(int orderItemId) {
         String sql = "SELECT status FROM order_items WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -315,7 +315,7 @@ public class OrderBusiness {
         } catch (Exception e) { throw new RuntimeException(e); }
     }
 
-    // 8. In Hóa đơn tạm tính theo SỐ BÀN và trả về thông tin [orderId, totalAmount]
+    // 8. In Hóa đơn tạm tính theo SỐ BÀN
     public double[] printBillAndGetTotal(int tableNumber) {
         // 8.1. Tìm Order ID đang active của SỐ BÀN này (JOIN thêm bảng t)
         int orderId = -1;
@@ -369,7 +369,7 @@ public class OrderBusiness {
     // 9. Thực hiện Thanh toán theo SỐ BÀN
     public boolean processCheckout(int tableNumber, int orderId, double totalAmount) {
         try (Connection conn = DBConnection.getConnection()) {
-            conn.setAutoCommit(false); // Dùng Transaction cho an toàn
+            conn.setAutoCommit(false); // Dùng Transaction
 
             // B1. Lưu vào bảng invoices
             String sqlInvoice = "INSERT INTO invoices (order_id, total_amount, paid_at) VALUES (?, ?, NOW())";
